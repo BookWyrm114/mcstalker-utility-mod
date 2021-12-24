@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "souper.mcstalker.client.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "MixinTitleScreen"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
