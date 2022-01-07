@@ -1,32 +1,38 @@
 {
   "schemaVersion": 1,
-  "id": "mcstalker",
+  "id": "mcstkr",
   "version": "${version}",
+
   "name": "MCStalker",
-  "description": "A Fabric utility mod for MCStalker.com that allows you to browse/connect to servers from inside the game.",
+  "description": "Allows you to join private servers using the MCStalker API.",
   "authors": [
-    "Souper"
+    "Akssu"
   ],
   "contact": {
-    "website": "https://mcstalker.com",
-    "repo": "https://github.com/SSouper/mcstalker-utility-mod"
+    "homepage": "https://mcstalker.com/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
-  "license": "MIT",
-  "environment": "client",
+
+  "license": "CC0-1.0",
+  "icon": "assets/mcstkr/icon.png",
+
+  "environment": "*",
   "entrypoints": {
-    "client": [
-      "souper.mcstalker.client.McstalkerClient"
-    ],
     "main": [
-      "souper.mcstalker.Mcstalker"
+      "akssu.mcstalker.MCStalker"
     ]
   },
   "mixins": [
-    "mcstalker.mixins.json"
+    "mcstkr.mixins.json"
   ],
+
   "depends": {
-    "fabricloader": ">=0.12.5",
+    "fabricloader": ">=0.11.3",
     "fabric": "*",
-    "minecraft": ">=1.17"
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
   }
 }
