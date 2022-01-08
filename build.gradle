@@ -11,11 +11,8 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
+	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -24,9 +21,10 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation 'com.google.code.gson:gson:2.8.9'
-	implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+	implementation 'org.json:json:20211205'
+	implementation 'com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0'
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 

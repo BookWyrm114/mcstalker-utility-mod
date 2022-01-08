@@ -1,29 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "mcstkr",
+  "id": "mcstalker",
   "version": "${version}",
-
   "name": "MCStalker",
-  "description": "Allows you to join private servers using the MCStalker API.",
+  "description": "A Fabric Utility Mod that allows you to interact with MC-Stalker in-game.",
   "authors": [
-    "Akssu"
+    "Akssu",
+    "SIMULATAN"
   ],
   "contact": {
     "homepage": "https://mcstalker.com/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/MC-Stalker/fabric-utility-mod"
   },
-
-  "license": "CC0-1.0",
-  "icon": "assets/mcstkr/icon.png",
-
+  "license": "MIT",
+  "icon": "assets/mcstalker/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "akssu.mcstalker.MCStalker"
+      "com.mcstalker.MCStalker"
     ]
   },
   "mixins": [
-    "mcstkr.mixins.json"
+    "mcstalker.mixins.json"
   ],
 
   "depends": {
