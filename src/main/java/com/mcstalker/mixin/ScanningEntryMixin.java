@@ -1,5 +1,6 @@
 package com.mcstalker.mixin;
 
+import com.mcstalker.screen.ServerDiscoveryScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerServerListWidget;
@@ -24,7 +25,7 @@ public class ScanningEntryMixin extends AlwaysSelectedEntryListWidget<Multiplaye
 
 	@Redirect(method = "updateEntries", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/multiplayer/MultiplayerServerListWidget;addEntry(Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;)I"))
 	public int updateEntries(MultiplayerServerListWidget instance, EntryListWidget.Entry<?> entry) {
-		if (this.client.currentScreen instanceof MultiplayerScreen) {
+		if (!(this.client.currentScreen instanceof ServerDiscoveryScreen)) {
 			return this.addEntry(this.scanningEntry);
 		} else {
 			return 0;

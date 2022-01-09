@@ -1,9 +1,9 @@
 package com.mcstalker.screen;
 
 import com.google.common.collect.Lists;
+import com.mcstalker.MCStalker;
 import com.mcstalker.networking.Requests;
-import com.mcstalker.networking.objects.Server;
-import com.mcstalker.screen.FilterOptionsScreen;
+import com.mcstalker.networking.objects.FilterServerResponse;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ConnectScreen;
@@ -24,7 +24,7 @@ import net.minecraft.text.TranslatableText;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.mcstalker.networking.objects.FilterProperties.page;
@@ -35,31 +35,39 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	private final MultiplayerServerListPinger serverListPinger = new MultiplayerServerListPinger();
 	private final Screen parent;
 	protected MultiplayerServerListWidget serverListWidget;
+	private static MultiplayerServerListWidget lastWidget;
 	private ServerList serverList;
-	//private ButtonWidget buttonEdit;
+
+	private static FilterServerResponse filterServerResponse;
+
 	private ButtonWidget buttonJoin;
-	//private ButtonWidget buttonDelete;
+	private ButtonWidget buttonPrevious;
+	private ButtonWidget buttonNext;
+
 	private List<Text> tooltipText;
 	private ServerInfo selectedEntry;
 	private boolean hasInited;
 
 	private final List<ButtonWidget> drawablesBypass = Lists.newArrayList();
 
-	public ServerDiscoveryScreen(Screen parent, ServerList serverList) {
+	public ServerDiscoveryScreen(Screen parent, FilterServerResponse response) {
 		super(parent);
 		this.parent = parent;
-		this.serverList = serverList;
+		this.serverList = response.getServerList();
+		filterServerResponse = response;
 		this.hasInited = false;
 	}
 
 	@Override
 	protected void init() {
-		client.keyboard.setRepeatEvents(true);
+		assert this.client != null;
+
+		this.client.keyboard.setRepeatEvents(true);
 		if (this.hasInited) {
 			this.serverListWidget.updateSize(width, height, 32, this.height - 64);
 		} else {
 			hasInited = true;
-			serverListWidget = new MultiplayerServerListWidget(this, client, width, height, 32, height - 64, 36);
+			lastWidget = serverListWidget = new MultiplayerServerListWidget(this, client, width, height, 32, height - 64, 36);
 
 			serverListWidget.setServers(this.serverList);
 		}
@@ -73,26 +81,22 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 
 		drawablesBypass.add(buttonJoin);
 
-		drawablesBypass.add(new ButtonWidget(width / 2 + 14, height - 28, 60, 20, new LiteralText("Next"), (button) -> {
-			page++;
-
-			try {
-				client.setScreen(new ServerDiscoveryScreen(this.parent, Requests.getServers().getServerList()));
-			} catch (IOException e) {
-				e.printStackTrace();
+		drawablesBypass.add(this.buttonNext = new ButtonWidget(width / 2 + 14, height - 28, 60, 20, new LiteralText("Next"), (button) -> {
+			if (filterServerResponse.remainingPages > 0) {
+				page++;
 			}
+
+			Requests.getServers(res -> {
+				MCStalker.toExecute.offer(() -> client.setScreen(new ServerDiscoveryScreen(this.parent, res)));
+			});
 		}));
 
-		drawablesBypass.add(new ButtonWidget(width / 2 + 4 - 55, height - 28, 60, 20, new LiteralText("Previous"), (button) -> {
-			page--;
-			if (page <= 0) {
-				page = 1;
-			}
-			try {
-				client.setScreen(new ServerDiscoveryScreen(this.parent, Requests.getServers().getServerList()));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		drawablesBypass.add(this.buttonPrevious = new ButtonWidget(width / 2 + 4 - 55, height - 28, 60, 20, new LiteralText("Previous"), (button) -> {
+			page = Math.max(page - 1, 0);
+
+			Requests.getServers(res -> {
+				MCStalker.toExecute.offer(() -> client.setScreen(new ServerDiscoveryScreen(this.parent, res)));
+			});
 		}));
 
 		drawablesBypass.add(new ButtonWidget(width / 2 + 4 + 76, height - 28, 75, 20, ScreenTexts.CANCEL, (button) -> {
@@ -105,8 +109,7 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 			this.client.setScreen(new FilterOptionsScreen(new LiteralText("Filter Options"), this.parent, this));
 		}));
 
-		for (ButtonWidget widget : drawablesBypass) // cheap hack to bypass stuff in MultiplayerScreen
-		{
+		for (ButtonWidget widget : drawablesBypass) {
 			addDrawableChild(widget);
 		}
 
@@ -126,12 +129,15 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (super.keyPressed(keyCode, scanCode, modifiers)) {
-			return true;
-		} else if (keyCode == 294) {
+		if (this.serverListWidget == null) {
+			this.serverListWidget = lastWidget;
+			System.out.println(this.serverListWidget);
+		}
+
+		if (keyCode == 294) {
 			this.refresh();
 			return true;
-		} else if (this.serverListWidget.getSelectedOrNull() != null) {
+		} else if (this.serverListWidget != null && this.serverListWidget.getSelectedOrNull() != null) {
 			if (keyCode != 257 && keyCode != 335) {
 				return this.serverListWidget.keyPressed(keyCode, scanCode, modifiers);
 			} else {
@@ -183,10 +189,22 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	protected void updateButtonActivationStates() {
 		this.buttonJoin.active = false;
 
-		MultiplayerServerListWidget.Entry entry = (MultiplayerServerListWidget.Entry) this.serverListWidget.getSelectedOrNull();
+		MultiplayerServerListWidget.Entry entry = this.serverListWidget.getSelectedOrNull();
 		if (entry != null && !(entry instanceof MultiplayerServerListWidget.ScanningEntry)) {
 			this.buttonJoin.active = true;
 		}
+
+		if (page <= 1)
+			this.buttonPrevious.active = false;
+
+		if (page >= filterServerResponse.remainingPages)
+			this.buttonNext.active = false;
+
+		if (page > 1)
+			this.buttonPrevious.active = true;
+
+		if (page < filterServerResponse.remainingPages)
+			this.buttonNext.active = true;
 	}
 
 	@Override
@@ -205,6 +223,6 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	}
 
 	private void refresh() {
-		this.client.setScreen(new ServerDiscoveryScreen(this.parent, this.serverList));
+		this.client.setScreen(new ServerDiscoveryScreen(this.parent, filterServerResponse));
 	}
 }

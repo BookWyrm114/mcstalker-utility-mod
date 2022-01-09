@@ -10,6 +10,7 @@ import com.mcstalker.networking.objects.FilterServersRequest;
 import com.mcstalker.networking.objects.Filters;
 import marcono1234.gson.recordadapter.RecordTypeAdapterFactory;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.client.MinecraftClient;
 import okhttp3.OkHttpClient;
@@ -17,7 +18,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Queue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class MCStalker implements ModInitializer {
@@ -44,6 +47,8 @@ public class MCStalker implements ModInitializer {
 			.registerTypeAdapterFactory(RecordTypeAdapterFactory.DEFAULT)
 			.create();
 
+	public static final Queue<Runnable> toExecute = new LinkedBlockingQueue<>();
+
 	@Override
 	public void onInitialize() {
 		new ConfigManager();
@@ -58,12 +63,13 @@ public class MCStalker implements ModInitializer {
 		});
 
 		LOGGER.info("Testing server filtering...");
-		try {
-			LOGGER.info(Requests.getServers());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		Requests.getServers(LOGGER::info);
 		LOGGER.info("Mod started!");
+
+		ClientTickEvents.START_CLIENT_TICK.register(client -> {
+			while (!toExecute.isEmpty()) {
+				toExecute.poll().run();
+			}
+		});
 	}
 }

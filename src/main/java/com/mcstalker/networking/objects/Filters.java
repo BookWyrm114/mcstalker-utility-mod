@@ -2,7 +2,6 @@ package com.mcstalker.networking.objects;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import com.ibm.icu.impl.duration.impl.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -58,7 +57,11 @@ public class Filters {
 		 T getRemapped();
 	}
 
-	public enum AscDesc implements Remappable<String> {
+	public interface FancyName {
+		String getFancyName();
+	}
+
+	public enum AscDesc implements Remappable<String>, FancyName {
 		ASC("Ascending"),
 		DESC("Descending");
 
@@ -68,8 +71,9 @@ public class Filters {
 			this.fancyName = fancyName;
 		}
 
+		@Override
 		public String getFancyName() {
-			return fancyName;
+			return fancyName.toUpperCase(Locale.ENGLISH);
 		}
 
 		@Override
@@ -97,8 +101,8 @@ public class Filters {
 
 	public enum WhiteListStatus implements Remappable<Integer> {
 		ANY(0),
-		WHITELISTED(1),
-		OPEN(2);
+		ON(1),
+		OFF(2);
 
 		private final int id;
 
