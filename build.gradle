@@ -4,6 +4,9 @@ plugins {
 	id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
+// add your own local dependencies here to test it with other mods
+apply from: 'localbuild.gradle'
+
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
@@ -37,18 +40,7 @@ dependencies {
 
 shadowJar {
 	configurations = [project.configurations.shadow]
-	classifier 'shadow-dev'
 }
-
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation 
-
-
-task relocateShadowJar(type: ConfigureShadowRelocation) {
-	target = tasks.shadowJar
-	prefix = "${project.group}.${project.archivesBaseName}.shadow"
-}
-
-tasks.shadowJar.dependsOn tasks.relocateShadowJar
 
 processResources {
 	inputs.property "version", project.version
@@ -58,14 +50,9 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
-}
-
 remapJar {
 	dependsOn shadowJar
-	input.set shadowJar.archiveFile.get()
+	input.set(shadowJar.archiveFile)
 }
 
 java {
