@@ -29,13 +29,14 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	implementation 'com.google.code.gson:gson:2.8.9'
 
-	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
-	shadow 'com.squareup.okhttp3:okhttp:4.9.3'
+	compileOnly 'com.google.code.gson:gson:2.8.9'
 
-	implementation 'com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0'
-	shadow 'com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0'
+	implementation('com.squareup.okhttp3:okhttp:4.9.3')
+	shadow('com.squareup.okhttp3:okhttp:4.9.3')
+
+	implementation('com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0')
+	shadow('com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0')
 
 	implementation 'org.json:json:20211205'
 	shadow 'org.json:json:20211205'
@@ -45,6 +46,10 @@ dependencies {
 
 shadowJar {
 	configurations = [project.configurations.shadow]
+	dependencies {
+		// gson is already included in the fabric-api
+		exclude(dependency('com.google.code.gson:gson:.*'))
+	}
 }
 
 processResources {
