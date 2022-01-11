@@ -4,8 +4,13 @@ plugins {
 	id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
+if (new File("localbuild.gradle").exists()) {
+	logger.info("Loading local changes...")
+	apply from: 'localbuild.gradle'
+} else {
+	logger.info("No localbuild.gradle file existing; skipping applying local changes")
+}
 // add your own local dependencies here to test it with other mods
-apply from: 'localbuild.gradle'
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
