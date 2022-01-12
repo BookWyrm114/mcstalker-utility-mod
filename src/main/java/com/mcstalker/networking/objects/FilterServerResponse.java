@@ -14,11 +14,25 @@ public class FilterServerResponse {
 	public final int remainingPages;
 	public final Server[] servers;
 
+	private boolean ratelimited;
+
+	public static final FilterServerResponse RATELIMITED = new FilterServerResponse(true);
+
+	public boolean isRatelimited() {
+		return ratelimited;
+	}
+
+	private FilterServerResponse(boolean ratelimited) {
+		this(-1, -1, -1, null);
+		this.ratelimited = ratelimited;
+	}
+
 	public FilterServerResponse(int page, int perPage, int remainingPages, Server[] servers) {
 		this.page = page;
 		this.perPage = perPage;
 		this.remainingPages = remainingPages;
 		this.servers = servers;
+		this.ratelimited = false;
 	}
 
 	public ServerList getServerList() {

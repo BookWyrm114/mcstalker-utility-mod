@@ -8,12 +8,17 @@ import com.mcstalker.networking.Requests;
 import com.mcstalker.networking.objects.FilterServerResponse;
 import com.mcstalker.networking.objects.FilterServersRequest;
 import com.mcstalker.networking.objects.Filters;
+import com.mcstalker.utils.RateLimitedException;
 import marcono1234.gson.recordadapter.RecordTypeAdapterFactory;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.client.MinecraftClient;
+import okhttp3.OkHttp;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +35,19 @@ public class MCStalker implements ModInitializer {
 	public static final MinecraftClient MC = MinecraftClient.getInstance();
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
 	public static final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
-	public static final OkHttpClient OKHTTP_CLIENT = new OkHttpClient();
+
+	public static final ModMetadata MOD_METADATA = FabricLoader.getInstance().getModContainer(MODID).orElseThrow().getMetadata();
+
+	public static final OkHttpClient OKHTTP_CLIENT = new OkHttpClient.Builder()
+			.addInterceptor(chain -> {
+				Request originalRequest = chain.request();
+				Request withUserAgent = originalRequest.newBuilder()
+						.header("User-Agent", "MCStalker-Fabric/" + MOD_METADATA.getVersion().getFriendlyString())
+						.build();
+				return chain.proceed(withUserAgent);
+			})
+			.build();
+
 	public static final Gson GSON_REMAPPED = new GsonBuilder()
 			.excludeFieldsWithModifiers(java.lang.reflect.Modifier.TRANSIENT)
 			// thanks GSON for not allowing you to register type adapters for generic interfaces
@@ -63,7 +80,13 @@ public class MCStalker implements ModInitializer {
 		});
 
 		LOGGER.info("Testing server filtering...");
-		Requests.getServers(LOGGER::info);
+		Requests.getServers(response -> {
+			if (response == null) {
+				LOGGER.error("Server filtering failed!");
+			} else if (response.isRatelimited()) {
+				LOGGER.error("Server filtering failed due to rate limiting!");
+			}
+		});
 		LOGGER.info("Mod started!");
 
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {

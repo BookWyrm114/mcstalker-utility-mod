@@ -7,6 +7,7 @@ import com.mcstalker.networking.objects.FilterServerResponse;
 import com.mcstalker.networking.objects.FilterServersRequest;
 import com.mcstalker.networking.objects.Server;
 import com.mcstalker.setting.Settings;
+import com.mcstalker.utils.RateLimitedException;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +32,7 @@ public class Requests {
 			.expireAfterWrite(1, TimeUnit.MINUTES)
 			.build(new CacheLoader<>() {
 				@Override
-				public @NotNull FilterServerResponse load(@NotNull FilterServersRequest filterServersRequest) throws IOException {
+				public @NotNull FilterServerResponse load(@NotNull FilterServersRequest filterServersRequest) throws IOException, RateLimitedException {
 					JSONObject jsonAsObj = new JSONObject(GSON_REMAPPED.toJson(filterServersRequest));
 					// ugly workaround to fix gson
 					jsonAsObj.remove("version");
@@ -54,6 +55,15 @@ public class Requests {
 					LOGGER.info("Requesting servers with filter: " + json);
 					Response response = call.execute();
 
+					if (response.code() != 200) {
+						if (response.code() == 429) {
+							LOGGER.error("Got ratelimited!");
+							throw new RateLimitedException();
+						}
+						LOGGER.error("Error while requesting servers: " + response.code() + " " + response.message());
+						throw new IOException("Error while requesting servers: " + response.code() + " " + response.message());
+					}
+
 					assert response.body() != null;
 
 					List<Server> servers = new ArrayList<>();
@@ -73,7 +83,7 @@ public class Requests {
 				}
 			});
 
-    public static @Nullable FilterServerResponse filterServers(FilterServersRequest filterServersRequest) throws NullPointerException {
+    public static @Nullable FilterServerResponse filterServers(FilterServersRequest filterServersRequest) throws NullPointerException, RateLimitedException {
 		try {
 			return serversCache.get(filterServersRequest);
 		} catch (ExecutionException e) {
@@ -98,26 +108,21 @@ public class Requests {
 	public static void getServers(Consumer<FilterServerResponse> callback) {
 		scheduledExecutor.submit(() -> {
 			try {
-				FilterServerResponse servers = getServers();
-				scheduledExecutor.execute(() -> {
-					// Lookahead - somehow seems like it doesn't really work...
-					for (int i = 0; i < Math.min(servers.remainingPages, 5); i++) {
-						getServers(i);
-					}
-				});
-				callback.accept(servers);
+				callback.accept(getServers());
 			} catch (NullPointerException e) {
 				LOGGER.error("Error while requesting servers: " + e.getMessage());
 				callback.accept(null);
+			} catch (RateLimitedException e) {
+				callback.accept(FilterServerResponse.RATELIMITED);
 			}
 		});
 	}
 
-	public static FilterServerResponse getServers() throws NullPointerException {
+	public static FilterServerResponse getServers() throws NullPointerException, RateLimitedException {
 		return getServers(page);
 	}
 
-    public static FilterServerResponse getServers(int page) throws NullPointerException {
+    public static FilterServerResponse getServers(int page) throws NullPointerException, RateLimitedException {
         return filterServers(
             new FilterServersRequest(
                 sortMode,
