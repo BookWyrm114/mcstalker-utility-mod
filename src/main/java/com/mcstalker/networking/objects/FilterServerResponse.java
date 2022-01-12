@@ -5,6 +5,8 @@ import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.option.ServerList;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class FilterServerResponse {
@@ -35,10 +37,14 @@ public class FilterServerResponse {
 		this.ratelimited = false;
 	}
 
+private static final Pattern IP_REGEX = Pattern.compile("^((?:(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$");
+
 	public ServerList getServerList() {
 		MCStalkerServerList result = new MCStalkerServerList(MCStalker.MC);
 		for (Server server : servers) {
-			result.add(new ServerInfo(server.ip(), server.ip(), false));
+			Matcher matcher = IP_REGEX.matcher(server.ip());
+			// string comparison to avoid int parsing exception
+			result.add(new ServerInfo(matcher.matches() && matcher.group(2) != null && matcher.group(2).equals("25565") ? matcher.group(1) : server.ip(), server.ip(), false));
 		}
 		return result;
 	}

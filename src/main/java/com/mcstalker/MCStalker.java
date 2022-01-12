@@ -1,28 +1,20 @@
 package com.mcstalker;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mcstalker.networking.Requests;
-import com.mcstalker.networking.objects.FilterServerResponse;
-import com.mcstalker.networking.objects.FilterServersRequest;
 import com.mcstalker.networking.objects.Filters;
-import com.mcstalker.utils.RateLimitedException;
 import marcono1234.gson.recordadapter.RecordTypeAdapterFactory;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.client.MinecraftClient;
-import okhttp3.OkHttp;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -54,7 +46,7 @@ public class MCStalker implements ModInitializer {
 			.registerTypeAdapter(Filters.AscDesc.class, new Filters.TypeAdapter())
 			.registerTypeAdapter(Filters.AuthStatus.class, new Filters.TypeAdapter())
 			.registerTypeAdapter(Filters.Country.class, new Filters.TypeAdapter())
-			.registerTypeAdapter(Filters.MinecraftVersion.class, new Filters.TypeAdapter())
+			.registerTypeAdapter(Filters.MinecraftVersion.class, new Filters.MinecraftVersion.TypeAdapter())
 			.registerTypeAdapter(Filters.SortMode.class, new Filters.TypeAdapter())
 			.registerTypeAdapter(Filters.WhiteListStatus.class, new Filters.TypeAdapter())
 			.registerTypeAdapterFactory(RecordTypeAdapterFactory.DEFAULT)

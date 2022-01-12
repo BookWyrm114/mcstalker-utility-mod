@@ -5,7 +5,7 @@ package com.mcstalker.networking.objects;
  */
 public record FilterServersRequest(
 	Filters.SortMode sortMode,
-	Filters.AscDesc ascDesc,
+	Filters.AscDesc ascdesc,
 	Filters.MinecraftVersion version,
 	Filters.Country country,
 	boolean mustHavePeople,

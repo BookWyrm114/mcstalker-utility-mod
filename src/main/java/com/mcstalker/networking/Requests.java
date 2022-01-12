@@ -3,6 +3,7 @@ package com.mcstalker.networking;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.mcstalker.networking.objects.FilterProperties;
 import com.mcstalker.networking.objects.FilterServerResponse;
 import com.mcstalker.networking.objects.FilterServersRequest;
 import com.mcstalker.networking.objects.Server;
@@ -32,11 +33,11 @@ public class Requests {
 			.expireAfterWrite(1, TimeUnit.MINUTES)
 			.build(new CacheLoader<>() {
 				@Override
-				public @NotNull FilterServerResponse load(@NotNull FilterServersRequest filterServersRequest) throws IOException, RateLimitedException {
+				public @NotNull FilterServerResponse load(@NotNull FilterServersRequest filterServersRequest) throws Exception {
 					JSONObject jsonAsObj = new JSONObject(GSON_REMAPPED.toJson(filterServersRequest));
 					// ugly workaround to fix gson
 					jsonAsObj.remove("version");
-					jsonAsObj.put("version", version.protocolId() == -1 ? "all" : version.getRemapped());
+					jsonAsObj.put("version", getInstance().version.protocolId() == -1 ? "all" : getInstance().version.getRemapped());
 					String json = jsonAsObj.toString();
 
 					RequestBody requestBody = RequestBody.create(json, MediaType.parse("application/json"));
@@ -55,6 +56,10 @@ public class Requests {
 					LOGGER.info("Requesting servers with filter: " + json);
 					Response response = call.execute();
 
+					ResponseBody responsebody = response.body();
+					assert responsebody != null;
+					String responsebodystring = responsebody.string();
+
 					if (response.code() != 200) {
 						if (response.code() == 429) {
 							LOGGER.error("Got ratelimited!");
@@ -62,13 +67,14 @@ public class Requests {
 						}
 						LOGGER.error("Error while requesting servers: " + response.code() + " " + response.message());
 						throw new IOException("Error while requesting servers: " + response.code() + " " + response.message());
+					} else {
+						LOGGER.info("Successfully requested servers! Body: " + responsebodystring.replaceAll("\"favicon\":[ ]?\".*\"", "\"favicon\":\"\""));
 					}
 
-					assert response.body() != null;
-
 					List<Server> servers = new ArrayList<>();
-					JSONObject body = new JSONObject(response.body().string());
+					JSONObject body = new JSONObject(responsebodystring);
 					JSONArray serversArr = body.getJSONArray("result");
+
 					for (int i = 0; i < serversArr.length(); i++) {
 						JSONObject jsonObject = serversArr.getJSONObject(i);
 						try {
@@ -119,22 +125,23 @@ public class Requests {
 	}
 
 	public static FilterServerResponse getServers() throws NullPointerException, RateLimitedException {
-		return getServers(page);
+		return getServers(getInstance().page);
 	}
 
     public static FilterServerResponse getServers(int page) throws NullPointerException, RateLimitedException {
+		final FilterProperties i = getInstance();
         return filterServers(
             new FilterServersRequest(
-                sortMode,
-                ascdesc,
-                version,
-                country,
-                mustHavePeople,
-                vanillaOnly,
-                searchText,
+                i.sortMode,
+                i.ascdesc,
+                i.version,
+                i.country,
+                i.mustHavePeople,
+                i.vanillaOnly,
+                i.searchText,
                 page,
-                whiteListStatus,
-                authStatus
+                i.whiteListStatus,
+                i.authStatus
             )
         );
     }

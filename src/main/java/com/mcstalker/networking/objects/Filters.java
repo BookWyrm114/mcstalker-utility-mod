@@ -31,6 +31,19 @@ public class Filters {
 		public Integer getRemapped() {
 			return protocolId;
 		}
+
+		public static class TypeAdapter extends com.google.gson.TypeAdapter<MinecraftVersion> {
+			@Override
+			public void write(JsonWriter out, MinecraftVersion value) throws IOException {
+				out.value(value.protocolId);
+			}
+
+			@Override
+			public MinecraftVersion read(JsonReader in) throws IOException {
+				int protocolId = in.nextInt();
+				return availableMojangVersions.values().stream().filter(v -> v.protocolId == protocolId).findFirst().orElse(new MinecraftVersion(-1,"all"));
+			}
+		}
 	}
 
 	public static class TypeAdapter extends com.google.gson.TypeAdapter<Remappable<?>> {
@@ -118,6 +131,7 @@ public class Filters {
 
 	public enum SortMode implements Remappable<String> {
 		UPDATED,
+		NEW,
 		EMPTY,
 		TOP;
 

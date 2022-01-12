@@ -1,6 +1,9 @@
 package com.mcstalker.screen;
 
+import com.mcstalker.ConfigManager;
+import com.mcstalker.MCStalker;
 import com.mcstalker.networking.Requests;
+import com.mcstalker.networking.objects.FilterProperties;
 import com.mcstalker.networking.objects.Filters;
 import com.mcstalker.utils.BooleanButton;
 import com.mcstalker.utils.EnumButton;
@@ -13,6 +16,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,9 +55,11 @@ public class FilterOptionsScreen extends Screen {
 		int baseY = (this.height - height) / 2;
 		int center = this.width / 2;
 
+		final FilterProperties i = getInstance();
+
 		// apply button
-		ButtonWidget btnApply = addDrawableChild(new ButtonWidget(center - 154, baseY + 150, 308, 20, Text.of("Apply Changes"), (button) -> {
-			page = 1;
+		addDrawableChild(new ButtonWidget(center - 154, baseY + 150, 308, 20, Text.of("Apply Changes"), (button) -> {
+			i.page = 1;
 			try {
 				client.setScreen(new ServerDiscoveryScreen(this.parent, Requests.getServers()));
 			} catch (Exception e) {
@@ -69,12 +75,14 @@ public class FilterOptionsScreen extends Screen {
 		// ------filter options------
 
 		this.buttonSortMode = addDrawableChild(new EnumButton<>(center - 154, baseY, 150, 20, Text.of("Sort Mode: %value%"), button -> {
+			i.sortMode = ((EnumButton<Filters.SortMode>) button).getValue();
 			saveSettings();
-		}, Filters.SortMode.UPDATED, Filters.SortMode.class));
+		}, gOD(i.sortMode, Filters.SortMode.UPDATED), Filters.SortMode.class));
 
 		this.buttonAscdesc = addDrawableChild(new EnumButton<>(center + 4, baseY, 150, 20, Text.of("Asc/Desc: %value%"), button -> {
+			i.ascdesc = ((EnumButton<Filters.AscDesc>) button).getValue();
 			saveSettings();
-		}, Filters.AscDesc.DESC, Filters.AscDesc.class));
+		}, gOD(i.ascdesc, Filters.AscDesc.DESC), Filters.AscDesc.class));
 
 		// TODO: Version
 		this.buttonVersionName = addDrawableChild(new TextFieldWidget(this.client.textRenderer, center - 152, baseY + 30, 146, 20, Text.of("Version")));
@@ -85,39 +93,48 @@ public class FilterOptionsScreen extends Screen {
 		// TODO: country
 
 		this.buttonMustHavePlayersOnline = addDrawableChild(new BooleanButton(center - 154, baseY + 60, 150, 20, Text.of("Players online: %value%"), button -> {
-			mustHavePeople = ((BooleanButton) button).getValue();
+			i.mustHavePeople = ((BooleanButton) button).getValue();
 			saveSettings();
-		}, mustHavePeople));
+		}, i.mustHavePeople));
 
 		this.buttonMustBeVanilla = addDrawableChild(new BooleanButton(center + 4, baseY + 60, 150, 20, Text.of("Vanilla only: %value%"), button -> {
-			vanillaOnly = ((BooleanButton) button).getValue();
+			i.vanillaOnly = ((BooleanButton) button).getValue();
 			saveSettings();
-		}, vanillaOnly));
+		}, i.vanillaOnly));
 
 		this.buttonMotdSearch = addDrawableChild(new TextFieldWidget(this.client.textRenderer, center - 152, baseY + 90, 305, 20, Text.of("MOTD Search")));
-		this.buttonMotdSearch.setText(searchText);
+		this.buttonMotdSearch.setText(i.searchText);
 		this.buttonMotdSearch.setChangedListener(text -> {
-			searchText = text;
+			i.searchText = text;
 			this.buttonMotdSearch.setSuggestion(text == null || text.isEmpty() ? "MOTD Search" : "");
 			saveSettings();
 		});
 		this.buttonMotdSearch.setSuggestion(this.buttonMotdSearch.getText() == null || this.buttonMotdSearch.getText().isEmpty() ? "MOTD Search" : "");
 
 		this.buttonWhiteListStatus = addDrawableChild(new EnumButton<>(center - 154, baseY + 120, 150, 20, Text.of("Whitelist: %value%"), button -> {
-			whiteListStatus = ((EnumButton<Filters.WhiteListStatus>) button).getValue();
+			i.whiteListStatus = ((EnumButton<Filters.WhiteListStatus>) button).getValue();
 			saveSettings();
-		}, Filters.WhiteListStatus.ANY, Filters.WhiteListStatus.class));
+		}, gOD(i.whiteListStatus, Filters.WhiteListStatus.ANY), Filters.WhiteListStatus.class));
 
 		this.buttonAuthStatus = addDrawableChild(new EnumButton<>(center + 4, baseY + 120, 150, 20, Text.of("Authentication: %value%"), button -> {
-			authStatus = ((EnumButton<Filters.AuthStatus>) button).getValue();
+			i.authStatus = ((EnumButton<Filters.AuthStatus>) button).getValue();
 			saveSettings();
-		}, Filters.AuthStatus.ANY, Filters.AuthStatus.class));
+		}, gOD(i.authStatus, Filters.AuthStatus.ANY), Filters.AuthStatus.class));
 
 		super.init();
 	}
 
 	private static void saveSettings() {
-		// TODO: save settings
+		ConfigManager.getInstance().writeConfigToFile();
+	}
+
+	private static <T> T gOD(@Nullable T value, T defaultValue) {
+		return value != null ? value : defaultValue;
+	}
+
+	@Override
+	public void onClose() {
+		this.client.setScreen(this.browser);
 	}
 
 	@Override

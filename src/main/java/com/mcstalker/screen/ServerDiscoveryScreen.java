@@ -3,6 +3,7 @@ package com.mcstalker.screen;
 import com.google.common.collect.Lists;
 import com.mcstalker.MCStalker;
 import com.mcstalker.networking.Requests;
+import com.mcstalker.networking.objects.FilterProperties;
 import com.mcstalker.networking.objects.FilterServerResponse;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerServerListWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.network.LanServerInfo;
 import net.minecraft.client.network.MultiplayerServerListPinger;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
@@ -21,22 +21,18 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import static com.mcstalker.networking.objects.FilterProperties.page;
+import static com.mcstalker.networking.objects.FilterProperties.getInstance;
 
 @Environment(EnvType.CLIENT)
 public class ServerDiscoveryScreen extends MultiplayerScreen {
-	private static final Logger LOGGER = LogManager.getLogger();
 	private final MultiplayerServerListPinger serverListPinger = new MultiplayerServerListPinger();
 	private final Screen parent;
 	protected MultiplayerServerListWidget serverListWidget;
 	private static MultiplayerServerListWidget lastWidget;
-	private ServerList serverList;
+	private final ServerList serverList;
 
 	private static FilterServerResponse filterServerResponse;
 
@@ -45,7 +41,6 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	private ButtonWidget buttonNext;
 
 	private List<Text> tooltipText;
-	private ServerInfo selectedEntry;
 	private boolean hasInited;
 
 	private final List<ButtonWidget> drawablesBypass = Lists.newArrayList();
@@ -75,39 +70,35 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 		drawablesBypass.clear();
 
 		addSelectableChild(serverListWidget);
-		buttonJoin = (new ButtonWidget(width / 2 - 154, height - 28, 100, 20, new TranslatableText("selectServer.select"), (button) -> {
-			this.connect();
-		}));
+		buttonJoin = (new ButtonWidget(width / 2 - 154, height - 28, 100, 20, new TranslatableText("selectServer.select"), (button) -> this.connect()));
 
 		drawablesBypass.add(buttonJoin);
 
 		drawablesBypass.add(this.buttonNext = new ButtonWidget(width / 2 + 14, height - 28, 60, 20, new LiteralText("Next"), (button) -> {
 			if (filterServerResponse.remainingPages > 0) {
-				page++;
+				getInstance().page++;
 			}
 
-			Requests.getServers(res -> {
-				MCStalker.toExecute.offer(() -> client.setScreen(new ServerDiscoveryScreen(this.parent, res)));
-			});
+			Requests.getServers(res -> MCStalker.toExecute.offer(() -> {
+				if (client.currentScreen instanceof ServerDiscoveryScreen)
+					client.setScreen(new ServerDiscoveryScreen(this.parent, res));
+			}));
 		}));
 
 		drawablesBypass.add(this.buttonPrevious = new ButtonWidget(width / 2 + 4 - 55, height - 28, 60, 20, new LiteralText("Previous"), (button) -> {
-			page = Math.max(page - 1, 0);
+			getInstance().page = Math.max(getInstance().page - 1, 1);
 
-			Requests.getServers(res -> {
-				MCStalker.toExecute.offer(() -> client.setScreen(new ServerDiscoveryScreen(this.parent, res)));
-			});
+			Requests.getServers(res -> MCStalker.toExecute.offer(() -> {
+				if (client.currentScreen instanceof ServerDiscoveryScreen)
+					client.setScreen(new ServerDiscoveryScreen(this.parent, res));
+			}));
 		}));
 
-		drawablesBypass.add(new ButtonWidget(width / 2 + 4 + 76, height - 28, 75, 20, ScreenTexts.CANCEL, (button) -> {
-			client.setScreen(parent);
-		}));
+		drawablesBypass.add(new ButtonWidget(width / 2 + 4 + 76, height - 28, 75, 20, ScreenTexts.CANCEL, (button) -> client.setScreen(parent)));
 
 		int width = 400;
 
-		drawablesBypass.add(new ButtonWidget(this.width / 2 - width / 4, height - 52, width / 2, 20, new LiteralText("Filter Servers"), (button) -> {
-			this.client.setScreen(new FilterOptionsScreen(new LiteralText("Filter Options"), this.parent, this));
-		}));
+		drawablesBypass.add(new ButtonWidget(this.width / 2 - width / 4, height - 52, width / 2, 20, new LiteralText("Filter Servers"), (button) -> this.client.setScreen(new FilterOptionsScreen(new LiteralText("Filter Options"), this.parent, this))));
 
 		for (ButtonWidget widget : drawablesBypass) {
 			addDrawableChild(widget);
@@ -131,10 +122,12 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (this.serverListWidget == null) {
 			this.serverListWidget = lastWidget;
-			System.out.println(this.serverListWidget);
 		}
 
-		if (keyCode == 294) {
+		if (keyCode == 256 && this.shouldCloseOnEsc()) {
+			this.onClose();
+			return true;
+		} else if (keyCode == 294) {
 			this.refresh();
 			return true;
 		} else if (this.serverListWidget != null && this.serverListWidget.getSelectedOrNull() != null) {
@@ -166,16 +159,12 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	@Override
 	public void connect() {
 		MultiplayerServerListWidget.Entry entry = serverListWidget.getSelectedOrNull();
-		if (entry instanceof MultiplayerServerListWidget.ServerEntry) {
-			this.connect(((MultiplayerServerListWidget.ServerEntry) entry).getServer());
-		} else if (entry instanceof MultiplayerServerListWidget.LanServerEntry) {
-			LanServerInfo lanServerInfo = ((MultiplayerServerListWidget.LanServerEntry) entry).getLanServerEntry();
-			this.connect(new ServerInfo(lanServerInfo.getMotd(), lanServerInfo.getAddressPort(), true));
+		if (entry instanceof MultiplayerServerListWidget.ServerEntry e) {
+			this.connectToServer(e.getServer());
 		}
 	}
 
-
-	private void connect(ServerInfo entry) {
+	private void connectToServer(ServerInfo entry) {
 		ConnectScreen.connect(this, client, ServerAddress.parse(entry.address), entry);
 	}
 
@@ -194,16 +183,17 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 			this.buttonJoin.active = true;
 		}
 
-		if (page <= 1)
+		final FilterProperties i = getInstance();
+		if (i.page <= 1)
 			this.buttonPrevious.active = false;
 
-		if (page >= filterServerResponse.remainingPages)
+		if (i.page >= filterServerResponse.remainingPages)
 			this.buttonNext.active = false;
 
-		if (page > 1)
+		if (i.page > 1)
 			this.buttonPrevious.active = true;
 
-		if (page < filterServerResponse.remainingPages)
+		if (i.page < filterServerResponse.remainingPages)
 			this.buttonNext.active = true;
 	}
 

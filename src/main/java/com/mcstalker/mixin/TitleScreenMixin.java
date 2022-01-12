@@ -31,7 +31,7 @@ public abstract class TitleScreenMixin extends Screen {
 			buttonWidget.active = false;
 			buttonWidget.setMessage(Text.of("MCStalker | Loading..."));
 			Requests.getServers(res -> {
-				if (res != null && res.isRatelimited()) {
+				if (res != null) {
 					if (!res.isRatelimited()) {
 						MCStalker.toExecute.offer(() -> {
 							this.client.setScreen(new ServerDiscoveryScreen(this, res));
