@@ -38,8 +38,10 @@ public class ConfigManager {
 			return;
 		}
 		try {
-			this.json = new JSONObject(Files.asCharSource(configFile, StandardCharsets.UTF_8).read());
-			MCStalker.GSON.fromJson(Files.asCharSource(filtersFile, StandardCharsets.UTF_8).read(), FilterProperties.class);
+			if (configFile.exists())
+				this.json = new JSONObject(Files.asCharSource(configFile, StandardCharsets.UTF_8).read());
+			if (filtersFile.exists())
+				MCStalker.GSON.fromJson(Files.asCharSource(filtersFile, StandardCharsets.UTF_8).read(), FilterProperties.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.json = new JSONObject();
