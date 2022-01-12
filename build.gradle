@@ -30,18 +30,19 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	compileOnly 'com.google.code.gson:gson:2.8.9'
+	compileOnly "com.google.code.gson:gson:2.8.9"
 
-	implementation('com.squareup.okhttp3:okhttp:4.9.3')
-	shadow('com.squareup.okhttp3:okhttp:4.9.3')
+	implementation "com.squareup.okhttp3:okhttp:4.9.3"
+	shadow "com.squareup.okhttp3:okhttp:4.9.3"
 
-	implementation('com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0')
-	shadow('com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0')
+	implementation "com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0"
+	shadow "com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0"
 
-	implementation 'org.json:json:20211205'
-	shadow 'org.json:json:20211205'
+	implementation "org.json:json:20211205"
+	shadow "org.json:json:20211205"
 
-	shadow 'javax.annotation:javax.annotation-api:1.3.2'
+	implementation "com.google.code.findbugs:jsr305:3.0.2"
+	shadow "com.google.code.findbugs:jsr305:3.0.2"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }

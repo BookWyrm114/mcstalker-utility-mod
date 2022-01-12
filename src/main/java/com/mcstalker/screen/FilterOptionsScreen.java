@@ -1,7 +1,6 @@
 package com.mcstalker.screen;
 
 import com.mcstalker.ConfigManager;
-import com.mcstalker.MCStalker;
 import com.mcstalker.networking.Requests;
 import com.mcstalker.networking.objects.FilterProperties;
 import com.mcstalker.networking.objects.Filters;
