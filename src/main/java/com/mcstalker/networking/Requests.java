@@ -27,7 +27,9 @@ import static com.mcstalker.networking.objects.FilterProperties.*;
 
 public class Requests {
 
-    private static final String REQUEST_URL = "https://backend.mcstalker.com/api/";
+	private static final String BASE_URL = "https://client.mcstalker.com/";
+    private static final String API_ENDPOINT = BASE_URL + "api/";
+	private static final String MOD_ENDPOINT = BASE_URL + "mod/";
 
 	private static final LoadingCache<FilterServersRequest, FilterServerResponse> serversCache = CacheBuilder.newBuilder()
 			.expireAfterWrite(1, TimeUnit.MINUTES)
@@ -43,7 +45,7 @@ public class Requests {
 					RequestBody requestBody = RequestBody.create(json, MediaType.parse("application/json"));
 
 					Request.Builder requestBuilder = new Request.Builder()
-							.url(REQUEST_URL + "filterservers")
+							.url(API_ENDPOINT + "filterservers")
 							.post(requestBody);
 
 					if (Settings.apiKey.getValue() != null) {
@@ -102,7 +104,7 @@ public class Requests {
         return new JSONArray(
                 OKHTTP_CLIENT.newCall(
                         new Request.Builder()
-                            .url(REQUEST_URL + "versions")
+                            .url(API_ENDPOINT + "versions")
                             .build()
                 )
                 .execute()
@@ -145,4 +147,26 @@ public class Requests {
             )
         );
     }
+
+	public static boolean veryifyHWID(String hwid) {
+		try {
+			Response result = OKHTTP_CLIENT.newCall(
+					new Request.Builder()
+							.url(MOD_ENDPOINT + "checkHwid")
+							.header("hwid", hwid)
+							.get()
+							.build()
+			).execute();
+			boolean valid = result.code() == 200;
+			if (valid) {
+				LOGGER.info("HWID is valid.");
+			} else {
+				LOGGER.error("Invalid HWID " + hwid + "! Code: " + result.code() + " Message: " + result.body().string());
+			}
+			return valid;
+		} catch (Exception e) {
+			LOGGER.error("Error while verifying hwid: " + e.getMessage());
+			return false;
+		}
+	}
 }

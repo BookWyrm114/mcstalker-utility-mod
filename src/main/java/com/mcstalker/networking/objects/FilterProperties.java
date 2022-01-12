@@ -1,6 +1,7 @@
 package com.mcstalker.networking.objects;
 
 import com.google.gson.annotations.Expose;
+import com.mcstalker.utils.Skip;
 
 public class FilterProperties {
 
@@ -21,7 +22,7 @@ public class FilterProperties {
 	public boolean mustHavePeople = false;
 	public boolean vanillaOnly = false;
 	public String searchText = "";
-	@Expose(serialize = false, deserialize = false)
+	@Skip(deserialization = true, serialization = true)
 	public int page = 1;
 	public Filters.WhiteListStatus whiteListStatus = Filters.WhiteListStatus.ANY;
 	public Filters.AuthStatus authStatus = Filters.AuthStatus.ANY;

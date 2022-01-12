@@ -4,8 +4,9 @@
   "package": "com.mcstalker.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "TitleScreenMixin",
-    "ScanningEntryMixin"
+    "MinecraftMixin",
+    "ScanningEntryMixin",
+    "TitleScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
