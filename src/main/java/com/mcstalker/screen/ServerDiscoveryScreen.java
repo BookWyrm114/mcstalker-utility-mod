@@ -35,6 +35,7 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	private final ServerList serverList;
 
 	private static FilterServerResponse filterServerResponse;
+	private static boolean wasAccessed;
 
 	private ButtonWidget buttonJoin;
 	private ButtonWidget buttonPrevious;
@@ -165,6 +166,7 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	}
 
 	private void connectToServer(ServerInfo entry) {
+		ServerDiscoveryScreen.wasAccessed = true;
 		ConnectScreen.connect(this, client, ServerAddress.parse(entry.address), entry);
 	}
 
@@ -195,6 +197,18 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 
 		if (i.page < filterServerResponse.remainingPages)
 			this.buttonNext.active = true;
+	}
+
+	public static FilterServerResponse getFilterServerResponse() {
+		return filterServerResponse;
+	}
+
+	public static boolean hasBeenAccessed() {
+		return wasAccessed;
+	}
+
+	public static void setBeenAccessed(boolean wasAccessed) {
+		ServerDiscoveryScreen.wasAccessed = wasAccessed;
 	}
 
 	@Override

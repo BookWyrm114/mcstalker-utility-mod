@@ -6,7 +6,8 @@
   "client": [
     "MinecraftMixin",
     "ScanningEntryMixin",
-    "TitleScreenMixin"
+    "TitleScreenMixin",
+    "GameMenuScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
