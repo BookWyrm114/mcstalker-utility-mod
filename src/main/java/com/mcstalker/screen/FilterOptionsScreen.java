@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mcstalker.networking.objects.FilterProperties.*;
+import static com.mcstalker.networking.objects.FilterProperties.getInstance;
 
 public class FilterOptionsScreen extends Screen {
 

@@ -1,6 +1,5 @@
 package com.mcstalker.networking.objects;
 
-import com.google.gson.annotations.Expose;
 import com.mcstalker.utils.Skip;
 
 public class FilterProperties {

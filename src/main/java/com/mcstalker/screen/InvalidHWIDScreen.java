@@ -1,8 +1,6 @@
 package com.mcstalker.screen;
 
-import baritone.utils.GuiClick;
 import com.mcstalker.MCStalker;
-import meteordevelopment.meteorclient.renderer.Renderer2D;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.Clipboard;
@@ -11,7 +9,6 @@ import net.minecraft.text.Text;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class InvalidHWIDScreen extends Screen {
