@@ -13,7 +13,7 @@ public class MinecraftMixin {
 	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V"))
 	public void inject(MinecraftClient instance, Screen screen) {
 		if (!MCStalker.VALID_HWID) {
-			instance.setScreen(new InvalidHWIDScreen());
+			instance.setScreen(new InvalidHWIDScreen(MCStalker.HWID_RESPONSE_CODE));
 		} else {
 			instance.setScreen(screen);
 		}

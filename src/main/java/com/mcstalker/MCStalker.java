@@ -42,14 +42,20 @@ public class MCStalker implements ModInitializer {
 
 	public static final OkHttpClient OKHTTP_CLIENT = new OkHttpClient.Builder()
 			.addInterceptor(chain -> {
+				String friendlyString = MOD_METADATA.getVersion().getFriendlyString();
+				// somehow some versions didn't properly read that, no idea why
+				if (friendlyString.equals("${version}"))
+					friendlyString = "dev";
 				Request originalRequest = chain.request();
 				Request withUserAgent = originalRequest.newBuilder()
-						.header("User-Agent", "MCStalker-Fabric/" + MOD_METADATA.getVersion().getFriendlyString())
+						.header("User-Agent", "MCStalker-Fabric/" + friendlyString)
 						.header("hwid", HWID)
 						.build();
 				return chain.proceed(withUserAgent);
 			})
 			.build();
+
+	public static final int HWID_RESPONSE_CODE = Requests.veryifyHWID(MCStalker.HWID);
 
 	public static final Gson GSON = new GsonBuilder()
 			.excludeFieldsWithModifiers(Modifier.TRANSIENT)
@@ -92,7 +98,7 @@ public class MCStalker implements ModInitializer {
 			.create();
 
 	public static final Queue<Runnable> toExecute = new LinkedBlockingQueue<>();
-	public static final boolean VALID_HWID = Requests.veryifyHWID(MCStalker.HWID);
+	public static final boolean VALID_HWID = HWID_RESPONSE_CODE == 200;
 
 	@Override
 	public void onInitialize() {

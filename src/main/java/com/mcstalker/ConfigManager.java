@@ -1,6 +1,5 @@
 package com.mcstalker;
 
-import ca.weblite.objc.Client;
 import com.google.common.io.Files;
 import com.mcstalker.networking.objects.FilterProperties;
 import org.json.JSONObject;
@@ -40,6 +39,7 @@ public class ConfigManager {
 		try {
 			if (configFile.exists())
 				this.json = new JSONObject(Files.asCharSource(configFile, StandardCharsets.UTF_8).read());
+
 			if (filtersFile.exists())
 				MCStalker.GSON.fromJson(Files.asCharSource(filtersFile, StandardCharsets.UTF_8).read(), FilterProperties.class);
 		} catch (Exception e) {

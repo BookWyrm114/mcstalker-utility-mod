@@ -7,7 +7,6 @@ import com.mcstalker.networking.objects.FilterProperties;
 import com.mcstalker.networking.objects.FilterServerResponse;
 import com.mcstalker.networking.objects.FilterServersRequest;
 import com.mcstalker.networking.objects.Server;
-import com.mcstalker.setting.Settings;
 import com.mcstalker.utils.RateLimitedException;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static com.mcstalker.MCStalker.*;
-import static com.mcstalker.networking.objects.FilterProperties.*;
+import static com.mcstalker.networking.objects.FilterProperties.getInstance;
 
 public class Requests {
 
@@ -47,10 +46,6 @@ public class Requests {
 					Request.Builder requestBuilder = new Request.Builder()
 							.url(API_ENDPOINT + "filterservers")
 							.post(requestBody);
-
-					if (Settings.apiKey.getValue() != null) {
-						requestBuilder.addHeader("Authorization", "Bearer " + Settings.apiKey.getValue());
-					}
 
 					Request request = requestBuilder.build();
 
@@ -148,7 +143,7 @@ public class Requests {
         );
     }
 
-	public static boolean veryifyHWID(String hwid) {
+	public static int veryifyHWID(String hwid) {
 		try {
 			Response result = OKHTTP_CLIENT.newCall(
 					new Request.Builder()
@@ -157,16 +152,19 @@ public class Requests {
 							.get()
 							.build()
 			).execute();
-			boolean valid = result.code() == 200;
+			int code = result.code();
+			boolean valid = code == 200;
 			if (valid) {
 				LOGGER.info("HWID is valid.");
+				result.body().close();
 			} else {
-				LOGGER.error("Invalid HWID " + hwid + "! Code: " + result.code() + " Message: " + result.body().string());
+				LOGGER.error("Invalid HWID " + hwid + "! Code: " + code + " Message: " + result.body().string());
 			}
-			return valid;
+			return code;
 		} catch (Exception e) {
 			LOGGER.error("Error while verifying hwid: " + e.getMessage());
-			return false;
+			e.printStackTrace();
+			return -1;
 		}
 	}
 }
