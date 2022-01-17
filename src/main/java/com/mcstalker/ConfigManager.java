@@ -41,14 +41,12 @@ public class ConfigManager {
 				this.json = new JSONObject(Files.asCharSource(configFile, StandardCharsets.UTF_8).read());
 
 			if (filtersFile.exists())
-				MCStalker.GSON.fromJson(Files.asCharSource(filtersFile, StandardCharsets.UTF_8).read(), FilterProperties.class);
+				FilterProperties.setInstance(MCStalker.GSON.fromJson(Files.asCharSource(filtersFile, StandardCharsets.UTF_8).read(), FilterProperties.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.json = new JSONObject();
 		}
 	}
-
-	private static final FilterProperties dummy = new FilterProperties();
 
 	/**
 	 * Set to the beginning of unix time so that the first file write won't get delayed
@@ -80,7 +78,7 @@ public class ConfigManager {
 				configFile.getParentFile().mkdirs();
 				filtersFile.getParentFile().mkdirs();
 				Files.asCharSink(configFile, StandardCharsets.UTF_8).write(this.json.toString(2));
-				Files.asCharSink(filtersFile, StandardCharsets.UTF_8).write(MCStalker.GSON.toJson(dummy));
+				Files.asCharSink(filtersFile, StandardCharsets.UTF_8).write(MCStalker.GSON.toJson(FilterProperties.getInstance()));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

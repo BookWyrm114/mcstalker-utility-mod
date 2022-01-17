@@ -1,4 +1,4 @@
-package com.mcstalker.utils;
+package com.mcstalker.utils.widgets;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;

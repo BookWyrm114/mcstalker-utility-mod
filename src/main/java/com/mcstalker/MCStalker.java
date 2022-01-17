@@ -32,7 +32,7 @@ public class MCStalker implements ModInitializer {
 	public static final String MODID = "mcstalker";
 	public static final String NAME = "MCStalker";
 	public static final MinecraftClient MC = MinecraftClient.getInstance();
-	public static final Logger LOGGER = LogManager.getLogger(MODID);
+	public static final Logger LOGGER = LogManager.getLogger(NAME);
 	public static final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
 	private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();

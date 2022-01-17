@@ -2,16 +2,22 @@ package com.mcstalker.networking.objects;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.mcstalker.utils.CaseInsensitiveMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 
 public class Filters {
 
-	public static final HashMap<String, MinecraftVersion> availableMojangVersions = new HashMap<>();
+	public static final HashMap<String, MinecraftVersion> availableMojangVersions = new CaseInsensitiveMap<>() {{
+		put("All", new MinecraftVersion(-1, "all"));
+	}};
 
 	public static void setAvailableMojangVersions(JSONArray input) {
 		input.forEach(obj -> {
@@ -23,9 +29,6 @@ public class Filters {
 	}
 
 	public record MinecraftVersion(int protocolId, String name) implements Remappable<Integer> {
-		public boolean isMajorRelease() {
-			return name.split("\\.").length == 2;
-		}
 
 		@Override
 		public Integer getRemapped() {
@@ -386,14 +389,34 @@ public class Filters {
 		ZM("Zambia (ZM)"),
 		ZW("Zimbabwe (ZW)");
 
+		private static final HashMap<String, Country> countries = new CaseInsensitiveMap<>();
+
 		Country(String fancyName) {
 			this.fancyName = fancyName;
+		}
+
+		public static @Nonnull HashMap<String, Country> getCountries() {
+			if (countries.isEmpty()) {
+				Arrays.stream(values())
+					.peek(c -> countries.put(c.name(), c))
+					// remove country code from autocorrect
+					.forEach(c -> countries.put(c.getCountryName(), c));
+			}
+			return countries;
+		}
+
+		public static @Nullable Country getCountry(String input) {
+			return input != null && getCountries().containsKey(input) ? getCountries().get(input) : null;
 		}
 
 		private final String fancyName;
 
 		public String getFancyName() {
 			return fancyName;
+		}
+
+		public String getCountryName() {
+			return fancyName.replaceAll(" \\([\\w]{2}\\)$", "");
 		}
 
 		@Override
