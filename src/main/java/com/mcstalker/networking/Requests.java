@@ -26,9 +26,8 @@ import static com.mcstalker.networking.objects.FilterProperties.getInstance;
 
 public class Requests {
 
-	private static final String BASE_URL = "https://client.mcstalker.com/";
+	private static final String BASE_URL = "https://backend.mcstalker.com/";
     private static final String API_ENDPOINT = BASE_URL + "api/";
-	private static final String MOD_ENDPOINT = BASE_URL + "mod/";
 
 	private static final LoadingCache<FilterServersRequest, FilterServerResponse> serversCache = CacheBuilder.newBuilder()
 			.expireAfterWrite(1, TimeUnit.MINUTES)
@@ -142,29 +141,4 @@ public class Requests {
             )
         );
     }
-
-	public static int veryifyHWID(String hwid) {
-		try {
-			Response result = OKHTTP_CLIENT.newCall(
-					new Request.Builder()
-							.url(MOD_ENDPOINT + "checkHwid")
-							.header("hwid", hwid)
-							.get()
-							.build()
-			).execute();
-			int code = result.code();
-			boolean valid = code == 200;
-			if (valid) {
-				LOGGER.info("HWID is valid.");
-				result.body().close();
-			} else {
-				LOGGER.error("Invalid HWID " + hwid + "! Code: " + code + " Message: " + result.body().string());
-			}
-			return code;
-		} catch (Exception e) {
-			LOGGER.error("Error while verifying hwid: " + e.getMessage());
-			e.printStackTrace();
-			return -1;
-		}
-	}
 }

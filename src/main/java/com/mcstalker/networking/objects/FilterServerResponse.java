@@ -42,6 +42,7 @@ private static final Pattern IP_REGEX = Pattern.compile("^((?:(?:\\d|[1-9]\\d|1\
 	public ServerList getServerList() {
 		MCStalkerServerList result = new MCStalkerServerList(MCStalker.MC);
 		for (Server server : servers) {
+			if (server == null) continue;
 			Matcher matcher = IP_REGEX.matcher(server.ip());
 			// string comparison to avoid int parsing exception
 			result.add(new ServerInfo(matcher.matches() && matcher.group(2) != null && matcher.group(2).equals("25565") ? matcher.group(1) : server.ip(), server.ip(), false));

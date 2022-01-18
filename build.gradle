@@ -25,35 +25,51 @@ repositories {
 }
 
 dependencies {
+	def implshadow = { id ->
+		implementation id
+		shadow id
+	}
+
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	compileOnly "com.google.code.gson:gson:2.8.9"
+	implshadow "com.google.code.gson:gson:2.8.9"
 
-	implementation "com.squareup.okhttp3:okhttp:4.9.3"
-	shadow "com.squareup.okhttp3:okhttp:4.9.3"
+	implshadow "com.squareup.okhttp3:okhttp:4.9.3"
 
-	implementation "com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0"
-	shadow "com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0"
+	implshadow "com.github.Marcono1234:gson-record-type-adapter-factory:0.1.0"
 
-	implementation "org.json:json:20211205"
-	shadow "org.json:json:20211205"
+	implshadow "org.json:json:20211205"
 
-	implementation "com.google.code.findbugs:jsr305:3.0.2"
-	shadow "com.google.code.findbugs:jsr305:3.0.2"
+	implshadow "com.google.code.findbugs:jsr305:3.0.2"
+
+	implementation("club.minnced:java-discord-rpc:2.0.2") {
+		exclude group: "club.minnced", module: "discord-rpc-release"
+	}
+	shadow("club.minnced:java-discord-rpc:2.0.2") {
+		exclude group: "club.minnced", module: "discord-rpc-release"
+	}
+
+	// 3.0.4 fails on jitpack
+	implshadow "club.minnced:discord-rpc-release:3.3.0"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 shadowJar {
-	configurations = [project.configurations.shadow]
-	dependencies {
-		// gson is already included in the fabric-api
-		exclude(dependency('com.google.code.gson:gson:.*'))
-	}
+	configurations = [ project.configurations.shadow ]
 }
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
+task relocateShadowJar(type: ConfigureShadowRelocation) {
+	target = tasks.shadowJar
+	prefix = "${project.group}.${project.archivesBaseName}.shadow"
+}
+
+tasks.shadowJar.dependsOn relocateShadowJar
 
 processResources {
 	inputs.property "version", project.version
@@ -69,9 +85,6 @@ remapJar {
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 }
 
