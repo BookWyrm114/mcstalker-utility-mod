@@ -53,7 +53,10 @@ public class MCStalker implements ModInitializer {
 
 	public static final Gson GSON = new GsonBuilder()
 			.excludeFieldsWithModifiers(Modifier.TRANSIENT)
-			.registerTypeAdapterFactory(RecordTypeAdapterFactory.DEFAULT)
+			.registerTypeAdapterFactory(RecordTypeAdapterFactory.builder()
+					.allowUnknownProperties()
+					.allowMissingComponentValues()
+					.create())
 			.addSerializationExclusionStrategy(new ExclusionStrategy() {
 				@Override
 				public boolean shouldSkipField(FieldAttributes f) {
