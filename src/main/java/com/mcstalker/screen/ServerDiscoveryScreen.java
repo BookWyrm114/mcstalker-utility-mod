@@ -146,7 +146,6 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		this.tooltipText = null;
-		//this.renderBackground(matrices);
 		this.serverListWidget.render(matrices, mouseX, mouseY, delta);
 		drawCenteredText(matrices, this.textRenderer, "MCStalker Server Browser", this.width / 2, 20, 16777215);
 		for (ButtonWidget widget : drawablesBypass) {
@@ -155,6 +154,8 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 		if (this.tooltipText != null) {
 			this.renderTooltip(matrices, this.tooltipText, mouseX, mouseY);
 		}
+		client.textRenderer.draw(matrices, "MCStalker mod by " + MCStalker.AUTHORS, 2, 2, 0xFFFFFF);
+		client.textRenderer.draw(matrices, "MCStalker by " + MCStalker.MCSTALKER_AUTHORS, 2, 5 + client.textRenderer.fontHeight, 0xFFFFFF);
 	}
 
 	@Override

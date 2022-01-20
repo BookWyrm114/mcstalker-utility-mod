@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.client.MinecraftClient;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,6 +26,8 @@ import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MCStalker implements ModInitializer {
 
@@ -95,6 +98,17 @@ public class MCStalker implements ModInitializer {
 			.create();
 
 	public static final Queue<Runnable> toExecute = new LinkedBlockingQueue<>();
+	public static final String AUTHORS = MOD_METADATA.getAuthors().stream().map(Person::getName).collect(Collectors.joining(", "));
+	public static final String MCSTALKER_AUTHORS;
+
+	static {
+		CustomValue.CvArray mcstalkerauthors = MCSTALKER_METADATA.get("mcstalkerauthors").getAsArray();
+		MCSTALKER_AUTHORS = IntStream
+				.range(0, mcstalkerauthors.size())
+				.mapToObj(mcstalkerauthors::get)
+				.map(CustomValue::getAsString)
+				.collect(Collectors.joining(", "));
+	}
 
 	@Override
 	public void onInitialize() {

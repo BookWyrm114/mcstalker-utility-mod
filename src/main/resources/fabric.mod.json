@@ -35,7 +35,8 @@
   },
   "custom": {
     "mcstalker": {
-      "discordappid": "931489011443331123"
+      "discordappid": "931489011443331123",
+      "mcstalkerauthors": [ "Souper", "TheOnlyWayUp" ]
     },
     "modmenu": {
       "links": {

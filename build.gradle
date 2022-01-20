@@ -60,6 +60,8 @@ dependencies {
 
 shadowJar {
 	configurations = [ project.configurations.shadow ]
+	relocate 'club.minnced', 'club.minnced'
+	relocate 'com.sun.jna', 'com.sun.jna'
 }
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
