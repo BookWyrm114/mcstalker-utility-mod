@@ -23,13 +23,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+@SuppressWarnings("ConstantConditions")
 @Mixin(GameMenuScreen.class)
 public class GameMenuScreenMixin extends Screen {
 	protected GameMenuScreenMixin(Text title) {
 		super(title);
 	}
-
-	private ButtonWidget bookmarkServerButton;
 
 	@Inject(at = @At("TAIL"), method = "initWidgets")
 	public void initWidgets(CallbackInfo info) {
@@ -43,7 +42,7 @@ public class GameMenuScreenMixin extends Screen {
 				}).forEach(this::remove);
 
 		final Text text = new TranslatableText(this.client.isInSingleplayer() ? "menu.returnToMenu" : "menu.disconnect");
-		this.addDrawableChild(new ButtonWidget(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, text, (button) -> {
+		this.addDrawableChild(new ButtonWidget(this.width / 2 - 102, this.height / 4 + 120 - 16, 204, 20, text, (button) -> {
 			final boolean inSingleplayer = this.client.isInSingleplayer();
 			button.active = false;
 
@@ -73,7 +72,7 @@ public class GameMenuScreenMixin extends Screen {
 			return;
 		}
 
-		this.addDrawableChild(new ButtonWidget(this.width / 2 - 102, this.height / 4 + 120 + -16 + 24, 204, 20, new LiteralText("Copy IP"), (button) -> {
+		this.addDrawableChild(new ButtonWidget(this.width / 2 - 102, this.height / 4 + 120 - 16 + 24, 204, 20, new LiteralText("Copy IP"), (button) -> {
 			new Clipboard().setClipboard(this.client.getWindow().getHandle(), this.client.getNetworkHandler().getConnection().getAddress().toString().split("/")[1]);
 			button.setMessage(Text.of("Copied!"));
 			button.active = false;
@@ -83,7 +82,7 @@ public class GameMenuScreenMixin extends Screen {
 			return;
 		}
 
-		bookmarkServerButton = new ButtonWidget(this.width / 2 - 102, this.height / 4 + 120 + -16 + (24 * 2), 204, 20, new LiteralText("Bookmark Server"), (button) -> {
+		ButtonWidget bookmarkServerButton = new ButtonWidget(this.width / 2 - 102, this.height / 4 + 120 - 16 + (24 * 2), 204, 20, new LiteralText("Bookmark Server"), (button) -> {
 			final String ip = this.client.getNetworkHandler().getConnection().getAddress().toString().split("/")[1];
 			this.client.setScreen(new BookmarkServerScreen(this, ip));
 		});

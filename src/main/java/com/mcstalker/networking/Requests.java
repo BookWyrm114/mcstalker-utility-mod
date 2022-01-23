@@ -85,7 +85,7 @@ public class Requests {
 				}
 			});
 
-    public static @Nullable FilterServerResponse filterServers(FilterServersRequest filterServersRequest) throws NullPointerException, RateLimitedException {
+    public static @Nullable FilterServerResponse filterServers(FilterServersRequest filterServersRequest) throws NullPointerException {
 		try {
 			return serversCache.get(filterServersRequest);
 		} catch (ExecutionException e) {
@@ -94,7 +94,8 @@ public class Requests {
 		return null;
 	}
 
-    public static JSONArray getVersions() throws Exception {
+    @SuppressWarnings("ConstantConditions")
+	public static JSONArray getVersions() throws Exception {
         return new JSONArray(
                 OKHTTP_CLIENT.newCall(
                         new Request.Builder()
@@ -124,7 +125,7 @@ public class Requests {
 		return getServers(getInstance().page);
 	}
 
-    public static FilterServerResponse getServers(int page) throws NullPointerException, RateLimitedException {
+    public static FilterServerResponse getServers(int page) throws NullPointerException {
 		final FilterProperties i = getInstance();
         return filterServers(
             new FilterServersRequest(

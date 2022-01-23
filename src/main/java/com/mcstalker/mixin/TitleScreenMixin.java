@@ -3,6 +3,7 @@ package com.mcstalker.mixin;
 import com.mcstalker.MCStalker;
 import com.mcstalker.networking.Requests;
 import com.mcstalker.screen.ServerDiscoveryScreen;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+@SuppressWarnings("ConstantConditions")
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
 
@@ -27,9 +29,7 @@ public abstract class TitleScreenMixin extends Screen {
 			Requests.getServers(res -> {
 				if (res != null) {
 					if (!res.isRatelimited()) {
-						MCStalker.toExecute.offer(() -> {
-							this.client.setScreen(new ServerDiscoveryScreen(this, res));
-						});
+						MCStalker.toExecute.offer(() -> this.client.setScreen(new ServerDiscoveryScreen(this, res)));
 					} else {
 						buttonWidget.active = false;
 						buttonWidget.setMessage(Text.of("Ratelimited!"));

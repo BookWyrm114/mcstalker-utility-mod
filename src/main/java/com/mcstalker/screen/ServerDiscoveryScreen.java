@@ -26,6 +26,7 @@ import java.util.List;
 
 import static com.mcstalker.networking.objects.FilterProperties.getInstance;
 
+@SuppressWarnings("ConstantConditions")
 @Environment(EnvType.CLIENT)
 public class ServerDiscoveryScreen extends MultiplayerScreen {
 	private final MultiplayerServerListPinger serverListPinger = new MultiplayerServerListPinger();
@@ -56,8 +57,6 @@ public class ServerDiscoveryScreen extends MultiplayerScreen {
 
 	@Override
 	protected void init() {
-		assert this.client != null;
-
 		this.client.keyboard.setRepeatEvents(true);
 		if (this.hasInited) {
 			this.serverListWidget.updateSize(width, height, 32, this.height - 64);

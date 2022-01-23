@@ -7,6 +7,7 @@ import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.option.ServerList;
 import net.minecraft.text.Text;
 
+@SuppressWarnings("ConstantConditions")
 public class BookmarkServerScreen extends Screen {
 
 	private final Screen parent;

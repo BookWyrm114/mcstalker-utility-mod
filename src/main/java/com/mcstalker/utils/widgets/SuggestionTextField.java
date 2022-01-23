@@ -6,7 +6,6 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 
 import javax.annotation.Nullable;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class SuggestionTextField extends TextFieldWidget {
@@ -29,13 +28,8 @@ public class SuggestionTextField extends TextFieldWidget {
 	@Nullable
 	private String getSuggestion(String text) {
 		if (text == null || text.isEmpty()) return suggestionList.getDefaultSuggestion();
-		text = text.toLowerCase(Locale.ENGLISH);
-		for (String t : this.suggestions) {
-			if (t.toLowerCase(Locale.ENGLISH).startsWith(text)) {
-				return t.substring(text.length());
-			}
-		}
-		return null;
+		String t = this.suggestions.startsWithIgnoreCase(text);
+		return t != null ? t.substring(text.length()) : null;
 	}
 
 	private final Consumer<String> onChanged;

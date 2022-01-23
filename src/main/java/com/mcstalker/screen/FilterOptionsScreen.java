@@ -20,10 +20,10 @@ import net.minecraft.text.Text;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static com.mcstalker.networking.objects.FilterProperties.getInstance;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused", "ConstantConditions"})
 public class FilterOptionsScreen extends Screen {
 
 	private final Screen parent;
@@ -48,8 +48,6 @@ public class FilterOptionsScreen extends Screen {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void init() {
-		assert this.client != null;
-
 		this.children().forEach(this::remove);
 		this.client.keyboard.setRepeatEvents(true);
 		this.textFields.clear();

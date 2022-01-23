@@ -11,13 +11,14 @@ public class CaseInsensitiveArrayList extends ArrayList<String> {
 		super(list);
 	}
 
-	public boolean startsWithIgnoreCase(String str) {
+	@Nullable
+	public String startsWithIgnoreCase(String str) {
 		for (String s : this) {
 			if (s.toLowerCase(Locale.ENGLISH).startsWith(str.toLowerCase(Locale.ENGLISH))) {
-				return true;
+				return s;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public boolean containsIgnoreCase(String str) {

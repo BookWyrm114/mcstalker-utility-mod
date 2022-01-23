@@ -64,6 +64,19 @@ shadowJar {
 	relocate 'com.sun.jna', 'com.sun.jna'
 }
 
+// rename the -all jar to -unremapped to avoid confusion
+task renameJar(type: Copy) {
+	from "build/libs"
+	into "build/libs"
+	include "*-all.jar"
+	rename { filename -> filename.replace("-all", "-unremapped") }
+	doLast {
+		delete fileTree("build/libs") {
+			include "*-all.jar"
+		}
+	}
+}
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 
 task relocateShadowJar(type: ConfigureShadowRelocation) {
@@ -72,6 +85,7 @@ task relocateShadowJar(type: ConfigureShadowRelocation) {
 }
 
 tasks.shadowJar.dependsOn relocateShadowJar
+tasks.build.finalizedBy renameJar
 
 processResources {
 	inputs.property "version", project.version
@@ -93,22 +107,5 @@ java {
 jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
-	}
-}
-
-// configure the maven publication
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			from components.java
-		}
-	}
-
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
 	}
 }

@@ -51,7 +51,7 @@ public class Filters {
 
 	public static class TypeAdapter extends com.google.gson.TypeAdapter<Remappable<?>> {
 		@Override
-		public void write(JsonWriter jsonWriter, Remappable remappable) throws IOException {
+		public void write(JsonWriter jsonWriter, Remappable<?> remappable) throws IOException {
 			if (remappable.getRemapped() instanceof String s) {
 				jsonWriter.value(s);
 			} else if (remappable.getRemapped() instanceof Integer i) {

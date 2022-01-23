@@ -1,9 +1,9 @@
 package com.mcstalker;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mcstalker.networking.Requests;
 import com.mcstalker.networking.objects.Filters;
 import com.mcstalker.utils.Skip;
@@ -20,7 +20,6 @@ import okhttp3.Request;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.Queue;
 import java.util.concurrent.Executors;
